@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+
+import random
+import numpy as np
+import typer
+from typing import Optional
+from yaspin import yaspin
+
+# Defaults column and row bounds
+lower_col_bound = 15000
+upper_col_bound = 20000
+lower_row_bound = 2000
+upper_row_bound = 8000
+
+def gen_rand_len(lower, upper):
+    return random.randint(lower, upper)
+
+yaspin(text="Creating test input...")
+def main(
+    columns: Optional[int] = typer.Argument(gen_rand_len(lower_col_bound, upper_col_bound)),
+    rows: Optional[int] = typer.Argument(gen_rand_len(lower_row_bound, upper_row_bound)),
+):
+    with yaspin().white.bold.shark.on_blue as sp:
+        sp.text = "Generating matrix and writing to disk..."
+
+        # Generate a 2d array randomly generated ints of 0 or 1
+        matrix = np.random.randint(2, size=(rows, columns))
+
+        # Write to test_input.csv
+        np.savetxt('test_input.csv', matrix, delimiter=',', fmt = '%i')
+
+    # Print info
+    info = '''\
+    Column length (genes) = {col_len}
+    Row length (# participants) = {row_len}
+        '''.format(col_len=columns, row_len=rows)
+    print(info)
+
+
+if __name__ == "__main__":
+    typer.run(main)
