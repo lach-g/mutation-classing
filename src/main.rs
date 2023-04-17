@@ -1,5 +1,7 @@
 use std::{error::Error, ops::Index, vec};
 use csv::{self, StringRecord};
+use mysql::*;
+use mysql::prelude::*;
 
 mod mutants;
 
@@ -7,7 +9,7 @@ mod mutants;
 ///
 /// ### Error
 /// If an error occurs, the error is returned to `main`.
-fn read_from_file(path: &str) -> Result<Vec<Vec<i32>>, Box<dyn Error>>
+/* fn read_from_file(path: &str) -> Result<Vec<Vec<i32>>, Box<dyn Error>>
 {
     let mut reader = csv::ReaderBuilder::new()
         .has_headers(false)
@@ -32,7 +34,7 @@ fn read_from_file(path: &str) -> Result<Vec<Vec<i32>>, Box<dyn Error>>
     println!("column len = {}", matrix.first().unwrap().len());
 
     Ok(matrix)
-}
+} */
 
 
 /// Gets mutations from struct iterating over to find mismatches, if none returns as match for Mutant type
@@ -48,9 +50,37 @@ fn match_mutant_indexes<T: mutants::Mutations>(mutant: T, row: &Vec<i32>) -> boo
     is_mutant
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct Genetics {
+    id: i32,
+    gene_1: i32,
+    gene_2: i32,
+    gene_3: i32,
+    gene_4: i32,
+    gene_5: i32,
+    gene_6: i32,
+    gene_7: i32,
+    gene_8: i32,
+    gene_9: i32,
+    gene_10: i32,
+}
+
 fn main()
 {
-    match read_from_file("./test_input.csv") {
+    let url = "mysql://root:password@localhost:3306/testdb";
+    let pool = Pool::new(url).unwrap();
+    let mut conn = pool.get_conn().unwrap();
+    let selected_payments = conn
+        .query_map(
+            "SELECT id, gene_1, gene_2, gene_3, gene_4, gene_5, gene_6, gene_7, gene_8, gene_9, gene_10 from genetics",
+            |(id, gene_1, gene_2, gene_3, gene_4, gene_5, gene_6, gene_7, gene_8, gene_9, gene_10)| {
+                Genetics { id, gene_1, gene_2, gene_3, gene_4, gene_5, gene_6, gene_7, gene_8, gene_9, gene_10 }
+            },
+        ).unwrap();
+    println!("{:?}", selected_payments);
+
+
+    /* match read_from_file("./test_input.csv") {
         Ok(matrix) => { 
             let mut mutant_as = 0;
             let mut mutant_bs = 0;
@@ -69,5 +99,8 @@ fn main()
         Err(e) => {
             eprintln!("{}", e);
         },
-    }
+} */
+
+
+
 }
